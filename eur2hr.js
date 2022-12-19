@@ -51,10 +51,10 @@ const lib = [
 ];
 
 /**
- * Convert  float number to croatian words
- * @param {float} num Floated number 
- * @param {object} options {delimiter:"", simple:false}
- * @returns {string} 
+ * Convert float number to croatian words
+ * @param {number} num Float value
+ * @param {object} options {delimiter: "", simple: false}
+ * @returns {string} Money as words
  */
 const eur2hr = (num, options) => {
     num = Number(parseFloat(num).toFixed(2));
@@ -86,4 +86,4 @@ const eur2hr = (num, options) => {
     return res;
 };
 
-export { eur2hr };
+export default eur2hr;

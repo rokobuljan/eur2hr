@@ -1,9 +1,9 @@
-import {eur2hr} from "./eur2hr.js";
+import eur2hr from "./eur2hr.js";
 import fs from "node:fs";
 let result = "";
 
 
-// TEST EXAMPLE:
+// TEST:
 
 const convertOptions = {
     delimiter: " ",

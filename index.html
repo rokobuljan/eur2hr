@@ -27,7 +27,7 @@
 
         #app {
             padding: 40px;
-            width: 100%;
+            max-width: 800px;
         }
 
         h1,
@@ -65,9 +65,9 @@
     </div>
 
     <script type="module">
-        import { eur2hr } from "./eur2hr.js";
+        import eur2hr from "./eur2hr.js";
 
-        const EL_input = document.querySelector("#input");
+        const EL_input    = document.querySelector("#input");
         const EL_output_1 = document.querySelector("#output_1");
         const EL_output_2 = document.querySelector("#output_2");
         const EL_output_3 = document.querySelector("#output_3");
