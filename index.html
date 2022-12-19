@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EUR2HR - Convert EUR value to Croatian words</title>
+    <style>
+        * {
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            min-height: 100vh;
+        }
+
+        body {
+            font: 1.2em sans-serif;
+            display: flex;
+            flex-flow: column nowrap;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #app {
+            padding: 40px;
+            width: 100%;
+        }
+
+        h1,
+        div {
+            padding: 0px 0px 20px;
+        }
+
+        p {
+            color: #888;
+            font-size: 0.9rem;
+            padding: 10px 0;
+        }
+
+        input {
+            padding: 10px;
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h1>Convert EUR value<br>to Croatian words (<i>višerječnice</i>)</h1>
+        <p>Examples</p>
+
+        <p><label><input type="number" id="input" value="1042.00" step="0.01"> &euro;</label></p>
+        <p>
+            OPTIONS: <code>{}</code></i>
+        </p>
+        <div id="output_1"></div>
+        <p>OPTIONS: <code>{ delimiter: " " }</code></p>
+        <div id="output_2"></div>
+        <p>OPTIONS: <code>{ delimiter: " " , simple: true }</code></p>
+        <div id="output_3"></div>
+    </div>
+
+    <script type="module">
+        import { eur2hr } from "./eur2hr.js";
+
+        const EL_input = document.querySelector("#input");
+        const EL_output_1 = document.querySelector("#output_1");
+        const EL_output_2 = document.querySelector("#output_2");
+        const EL_output_3 = document.querySelector("#output_3");
+
+        const showMoneyWords = () => {
+            const num = parseFloat(EL_input.value);
+            EL_output_1.textContent = eur2hr(num);
+            EL_output_2.textContent = eur2hr(num, { delimiter: " " });
+            EL_output_3.textContent = eur2hr(num, { simple: true, delimiter: " " });
+        };
+
+        console.log(eur2hr("22.34"));
+
+        EL_input.addEventListener("input", showMoneyWords);
+        showMoneyWords();
+    </script>
+</body>
+
+</html>
