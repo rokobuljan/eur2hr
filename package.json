@@ -12,7 +12,7 @@
   },
   "keywords": ["Convert", "Money", "Euro", "EUR", "Croatian", "words"],
   "author": "Roko C. Buljan",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/rokobuljan/eur2hr/issues"
   },
