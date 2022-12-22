@@ -34,6 +34,8 @@ import eur2hr from "@rbuljan/eur2hr";
 const words = eur2hr(1042.31, { simple: true, delimiter: " " });
 ```
 
+> tisuću četrdeset dva eura i trideset jedan cent
+
 ## Syntax
 
 ```js
@@ -54,13 +56,6 @@ Returns a **String**, with the the Croatian representation of money as words, or
 | --------- | ------- | ------- | ---------------------------------------------------------------------------- |
 | delimiter | String  | `""`    | Use i.e. `" "` to delimit words with space                                        |
 | simple    | Boolean | `false` | Set to true to remove unnecessary *"jedan/na"* for round *thousands* numbers |
-
-
-
-
-> tisuću četrdeset dva eura i trideset jedan cent
-
- 
 
 ## Test
 
