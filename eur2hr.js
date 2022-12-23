@@ -56,7 +56,7 @@ const lib = [
  * @param {object} options {delimiter: "", simple: false}
  * @returns {string} Money as words
  */
-const eur2hr = (num, options) => {
+const eur2hr2 = (num, options) => {
     num = Number(parseFloat(num).toFixed(2));
     const int = parseInt(num, 10);
     if (int > 1e13) return "Error";
@@ -84,6 +84,44 @@ const eur2hr = (num, options) => {
     const lp = d ? tens(d) : "nula ";
     res += `${!dlm ? " " : ""}eur${plur(int, "o", "a", "a")} i ${lp}${!dlm ? " " : ""}cent${plur(d, "", "a", "i")}`;
     return res;
+};
+
+/**
+ * Convert float number (EUR, Euro) to croatian words
+ * @param {number|string} number float value in Euro (ideally anready in two decimals)
+ * @param {object} options {delimiter:String, simple:Boolean}  
+ * @return {string} Money value as words in croatian (višerječnice)
+ */
+const eur2hr = (number, options) => {
+
+    // convert input String|Number back to a two decimal number
+    number = Number(parseFloat(num).toFixed(2));
+
+    // Prevent floats being out max range
+    if (number > Number.MAX_VALUE) return "error";
+
+    // Represent the input number as integer
+    const integer = parseInt(number, 10);
+
+    // User options and default fallbacks
+    const delimiter = options.delimiter ?? "";
+    const simple = options.simple ?? false;
+
+    // This is to count how many "thousands" '*,000' places are we in 
+    let thousands = 0;
+
+    // Croatian language specifics
+    const plurals = (i, ones, x234, oth) => (/(?<!1)[234]$/.test(i) ? x234 : (i !== 11 && i % 10) === 1 ? ones : oth);
+    const ones = i => (!i ? "" : (i < 3 ? lib[0][i][th % 2] : lib[0][i]) + dlm);
+    const tens = i => (i < 10 ? ones(i) : i === 10 || i >= 20 ? (i % 10 ? lib[2][~~(i / 10)] + dlm + ones(i % 10) : lib[2][~~(i / 10)] + dlm) : lib[1][i % 10] + dlm);
+    const huns = i => (i < 10 ? ones(i) : i < 100 ? tens(i) : lib[3][~~(i / 100)] + dlm + tens(i % 100));
+
+    const localizationOptions = {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    };
+
+
 };
 
 export default eur2hr;
