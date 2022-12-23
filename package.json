@@ -1,6 +1,6 @@
 {
   "name": "@rbuljan/eur2hr",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "Convert EUR value to Croatian words",
   "main": "eur2hr.js",
   "scripts": {
@@ -16,5 +16,6 @@
   "bugs": {
     "url": "https://github.com/rokobuljan/eur2hr/issues"
   },
-  "homepage": "https://github.com/rokobuljan/eur2hr#readme"
+  "homepage": "https://github.com/rokobuljan/eur2hr#readme",
+  "type": "module"
 }

@@ -42,13 +42,14 @@ const words = eur2hr(1042.31, { simple: true, delimiter: " " });
 eur2hr(number [, {options}])
 ```
 
-Returns a **String**, with the the Croatian representation of money as words, or `"Error"` 
+Returns a **String**, with the the Croatian representation of money as words.   
+Returns String `"Error"` if the input number is greater than `1e13` (`10_000_000_000_000.00`) 
 
 ## Arguments
 
 #### number (String|Number)
 
-`number` is a float **String** or **Number** (only valid up to `1E13`).
+`number` is a float **String** or **Number**
 
 #### options (Object)
 

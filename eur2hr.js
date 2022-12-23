@@ -50,78 +50,158 @@ const lib = [
     },
 ];
 
-/**
- * Convert float number to croatian words
- * @param {number} num Float value
- * @param {object} options {delimiter: "", simple: false}
- * @returns {string} Money as words
- */
-const eur2hr2 = (num, options) => {
-    num = Number(parseFloat(num).toFixed(2));
-    const int = parseInt(num, 10);
-    if (int > 1e13) return "Error";
-    const { delimiter: dlm, simple } = Object.assign({ delimiter: "", simple: false }, options);
-    let th = 0; // Thousands depth
-    const locOpts = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
-    const plur = (i, ones, x234, oth) => (/(?<!1)[234]$/.test(i) ? x234 : (i !== 11 && i % 10) === 1 ? ones : oth);
-    const ones = i => (!i ? "" : (i < 3 ? lib[0][i][th % 2] : lib[0][i]) + dlm);
-    const tens = i => (i < 10 ? ones(i) : i === 10 || i >= 20 ? (i % 10 ? lib[2][~~(i / 10)] + dlm + ones(i % 10) : lib[2][~~(i / 10)] + dlm) : lib[1][i % 10] + dlm);
-    const huns = i => (i < 10 ? ones(i) : i < 100 ? tens(i) : lib[3][~~(i / 100)] + dlm + tens(i % 100));
-    const arr = Math.abs(num).toLocaleString("en-US", locOpts).split(/[,.]/g);
-    const d = +arr.pop();
-    const len = arr.length;
-    let res = +num < 0 ? "minus " : "";
-    arr.forEach((str, idx) => {
-        const i = +str;
-        th = len - 1 - idx; // Thousands depth
-        if (!i) return (res += len === 1 ? "nula " : ""); // Handle zeroes
-        res += simple && th > 0 && i < 2 ? "" : huns(i); // If simple version don't print "jedan"'s
-        if (th === 1) res += `tisuć${plur(i, simple && i === 1 ? "u" : "a", "e", "a")}` + dlm;
-        else if (th === 2) res += `miliju${plur(i, "n", "na", "na")}` + dlm;
-        else if (th === 3) res += `milijard${plur(i, "a", "e", "i")}` + dlm;
-        else if (th === 4) res += `biliju${plur(i, "n", "na", "na")}` + dlm;
-    });
-    const lp = d ? tens(d) : "nula ";
-    res += `${!dlm ? " " : ""}eur${plur(int, "o", "a", "a")} i ${lp}${!dlm ? " " : ""}cent${plur(d, "", "a", "i")}`;
-    return res;
+const localizationOptions = {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
 };
 
 /**
- * Convert float number (EUR, Euro) to croatian words
+ * eur2hr
+ * Convert float number (EUR, Euro) to croatian words.
  * @param {number|string} number float value in Euro (ideally anready in two decimals)
  * @param {object} options {delimiter:String, simple:Boolean}  
  * @return {string} Money value as words in croatian (višerječnice)
  */
-const eur2hr = (number, options) => {
+const eur2hr = (number = 0, options = {}) => {
 
     // convert input String|Number back to a two decimal number
-    number = Number(parseFloat(num).toFixed(2));
-
-    // Prevent floats being out max range
-    if (number > Number.MAX_VALUE) return "error";
-
+    number = Number(parseFloat(number).toFixed(2));
     // Represent the input number as integer
     const integer = parseInt(number, 10);
 
+    // Prevent out of max range
+    if (integer > 1e13) {
+        return "Error";
+    }
+
+    const isNegative = number < 0;
+
     // User options and default fallbacks
     const delimiter = options.delimiter ?? "";
-    const simple = options.simple ?? false;
+    const isSimple = options.simple ?? false;
 
     // This is to count how many "thousands" '*,000' places are we in 
-    let thousands = 0;
+    let thousandsPointer = 0;
 
-    // Croatian language specifics
-    const plurals = (i, ones, x234, oth) => (/(?<!1)[234]$/.test(i) ? x234 : (i !== 11 && i % 10) === 1 ? ones : oth);
-    const ones = i => (!i ? "" : (i < 3 ? lib[0][i][th % 2] : lib[0][i]) + dlm);
-    const tens = i => (i < 10 ? ones(i) : i === 10 || i >= 20 ? (i % 10 ? lib[2][~~(i / 10)] + dlm + ones(i % 10) : lib[2][~~(i / 10)] + dlm) : lib[1][i % 10] + dlm);
-    const huns = i => (i < 10 ? ones(i) : i < 100 ? tens(i) : lib[3][~~(i / 100)] + dlm + tens(i % 100));
+    /**
+     * Language specifics (Croatian)
+     * Depending on count and M,F,N append a specific character to a word
+     * I.e: for the word cent: 1cent"" 2,3,4cent"a" 5cent"i" etc.
+     * Such uses a language specific that in the case of numbers ending
+     * in 2,3,4 we need a diferent suffix (therefore the x234 variable)
+     * @param {number} int Integer from triplet
+     * @param {string} singular Suffix for singular
+     * @param {string} x234 Suffix for nums ending in 2,3,4 (except 11,12,13,14)
+     * @param {string} other General suffix for all other plurals
+     * @returns {string} Suffixed string word
+     */
+    const plural = (int, singular, x234, other) => {
 
-    const localizationOptions = {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        // Check of number ends in 2|3|4 but is not preceded by
+        // the number 1 (i.e numbers 12, 13, 14, 112, etc)
+        if (/(^|[^1])[234]$/.test(int)) {
+            return x234;
+        }
+        // Singular, numbers ending in "1" (besides the number 11)
+        else if (int !== 11 && int % 10 === 1) {
+            return singular;
+        }
+        // all other numbers
+        return other;
+    };
+    
+    /**
+     * Handle "ones" point (jedinice) from triplet "oo0"
+     * @param {number} int Integer to convert to word
+     * @returns {string} word from library
+     */
+    const ones = (int) => {
+        if (int === 0) {
+            return "";
+        } 
+        // The numbers-words lib uses array for "1" and "2"
+        else if (int < 3) {
+            // The `thousandsPointer % 2` is a lucky chance that every  
+            // thousands increment we have a gender switch
+            return lib[0][int][thousandsPointer % 2] + delimiter;
+        }
+        // Else, return directly a number-word from lib
+        return lib[0][int] + delimiter;
     };
 
+    /**
+     * Handle "tens" point (desetinke) from triplet "o0o" 
+     * @param {number} int Integer to convert to word
+     * @returns {string} word from library
+     */
+    const tens = (int) => {
+        if (int < 10) {
+            return ones(int);
+        }
+        else if(int === 10 || int >= 20) {
+            return lib[2][Math.floor(int / 10)] + delimiter + (int % 10 ? ones(int % 10) : "");
+        }
+        return lib[1][int % 10] + delimiter;
+    }
 
+    /**
+     * Handle "huns" point (stotinke) from triplet "0oo" 
+     * @param {number} int Integer to convert to word
+     * @returns {string} word from library
+     */
+    const huns = (int) => {
+        if (int < 10) {
+            return ones(int);
+        }
+        else if (int < 100) {
+            return tens(int);
+        }
+        return lib[3][Math.floor(int / 100)] + delimiter + tens(int % 100);
+    }
+
+    // Convert Number to Locale string i.e: "1,234,567.89"
+    // and split the number into triplets and decimals i.e:  
+    const triplets = Math.abs(number).toLocaleString("en-US", localizationOptions).split(/[,.]/g);
+
+    // Extract (and remove) the decimals part from triplets
+    const decimal = Number(triplets.pop());
+    const tripletsLen = triplets.length;
+
+    // Let's analyse the triplets strings array and
+    // construct the final result:
+
+    let result = isNegative ? "minus " : "";
+
+    triplets.forEach((str, idx) => {
+        const int = Number(str);
+        thousandsPointer = tripletsLen - 1 - idx; // Thousands depth
+        if (!int) {
+            // Handle zeroes
+            result += tripletsLen === 1 ? "nula " : "";
+            return result; 
+        }
+        // If isSimple mode, don't print "jedan"'s
+        result += isSimple && thousandsPointer > 0 && int < 2 ? "" : huns(int); 
+
+        if (thousandsPointer === 1) {
+            result += `tisuć${plural(int, isSimple && int === 1 ? "u" : "a", "e", "a")}` + delimiter;
+        }
+        else if (thousandsPointer === 2) {
+            result += `miliju${plural(int, "n", "na", "na")}` + delimiter;
+        }
+        else if (thousandsPointer === 3) {
+            result += `milijard${plural(int, "a", "e", "i")}` + delimiter;
+        }
+        else if (thousandsPointer === 4) {
+            result += `biliju${plural(int, "n", "na", "na")}` + delimiter;
+        }
+        // Hopefully we don't need more than this.
+    });
+
+    const cents = decimal ? tens(decimal) : "nula ";
+    result += `${!delimiter ? " " : ""}eur${plural(integer, "o", "a", "a")} i ${cents}${!delimiter ? " " : ""}cent${plural(decimal, "", "a", "i")}`;
+
+    return result;
 };
 
 export default eur2hr;

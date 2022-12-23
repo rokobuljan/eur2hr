@@ -2,14 +2,15 @@ import eur2hr from "./eur2hr.js";
 import fs from "node:fs";
 let result = "";
 
-
-// TEST:
-
 const convertOptions = {
     delimiter: " ",
     simple: false,
 };
 
+// TEST custom:
+// result += eur2hr(1234567.45, convertOptions) + "\n";
+
+// TEST loop:
 let step = 0;
 for (let i = 0; i < 250; ++i) {
     const num = step;
